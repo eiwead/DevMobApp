@@ -1,0 +1,48 @@
+html{
+  background-color: #e6ac0c;
+}
+h3{
+  text-align: center;
+  color: black;
+}
+
+form{
+  text-align: center;
+}
+
+body {
+  font-family: sans-serif;
+  font-size: 2em;
+  width: 50%;
+  margin: 0 auto;
+}
+
+ input, button, div, section {
+  display: 'block';
+  width: 100%;
+  font-family: sans-serif;
+  font-size: 1em;
+  margin: 10px;
+}
+input{
+  color: white;
+  background-color: black;
+}
+.remove {
+  display: 'block';
+  background-color: red;
+  width: 10%;
+  font-family: sans-serif;
+}
+.checkbox {
+  display: 'block';
+  border: 2px solid black;
+  width: 10%;
+  height: 20px;
+  font-family: sans-serif;
+  font-size: 18px;
+  margin: auto;
+}
+.add {
+  background-color: white;
+}
