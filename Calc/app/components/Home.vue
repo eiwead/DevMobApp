@@ -55,19 +55,19 @@ let ow = true;
                     dot = false;
                     ow = true;
                     this.output += char;
-                }
-                },
-                dot: function(char){
-                    if(char === '.' && dot === false){
-                        if (ow === true){
-                            this.output += 0;
-                            ow = false;                                                    
-                        }
-                        digit = true;
+                }                    
+            },                
+            dot: function(char){
+                if(char === '.' && dot === false){                    
+                    if (ow === true){                      
+                        this.output += 0;
+                        ow = false;   
+                    }                                  
+                        digit = true;                        
                         dot = true;
                         this.output += char;
-                    }                
-                },
+                }                
+            },
                 
             calc: function(){
                 try{
