@@ -1,118 +1,165 @@
 <template>
-  <Page  class="app">
-    <ActionBar title="Мои задачи" class="action-bar"/>
+  <Page class="page">
+    <ActionBar title="My Tasks" class="action-bar" />
 
-    <StackLayout
-      orientation="vertical"
-      width="100%"
+    <TabView
       height="100%"
+      android-tabs-position="bottom"
+      selected-tab-text-color="#53ba82"
+      tab-text-font-size="15"
     >
-      <GridLayout
-        columns="2*,*"
-        rows="*"
-        width="100%"
-        height="25%"
-      >
-        <TextField v-model="newText" hint="Введите задачу..."/>
-        <button class="Add"
-          col="1"
-          row="0"
-          text="Добавить"
-          @tap= "newTask()"
-        />
-      </GridLayout>
-        <ListView  class="task" for="task in tasks" style="height:100%">
+      <TabViewItem title="To Do" text-transform="uppercase">
+        
+        <StackLayout
+          orientation="vertical"
+          width="100%"
+          height="100%"
+        >
+          <GridLayout
+            columns="2*,*"
+            rows="*"
+            width="100%"
+            height="25%"
+          >
+            <TextField
+              v-model="textFieldValue"
+              col="0"
+              row="0"
+              hint="Type new task..."
+              editable="true"
+              @returnPress="onButtonTap"
+            />
+            
+            <Button
+              col="1"
+              row="0"
+              text="Add task"
+              @tap="onButtonTap"
+            />
+          </GridLayout>
+
+          <ListView
+            class="list-group"
+            for="todo in todos"
+            style="height:75%"
+            separator-color="transparent"
+            @itemTap="onItemTap"
+          >
+            <v-template>
+              <Label
+                id="active-task"
+                :text="todo.name"
+                class="list-group-item-heading"
+                text-wrap="true"
+              />
+            </v-template>
+          </ListView>
+        </StackLayout>
+      </TabViewItem>
+
+      <TabViewItem title="Completed" text-transform="uppercase">
+        <ListView
+          class="list-group"
+          for="done in dones"
+          style="height:75%"
+          separator-color="transparent"
+          @itemTap="onDoneTap"
+        >
           <v-template>
-            <GridLayout columns="200, 70, 70">
-            <label  class="task done" v-if="task.done" textWrap="true" col="0">{{task.title}}</label>
-            <label  class="task" v-else  @tap="edit(task.id, task.title)" col="0">{{task.title}}</label>
-            <Button  class="button" text="✔" @tap="taskDone(task.id)" col="1"/>
-            <Button  class="button" text="✘" @tap="remove(task.id)" col="2"/> 
-            </GridLayout>
+            <Label
+              id="completed-task"
+              :text="done.name"
+              class="list-group-item-heading"
+              text-wrap="true"
+            />
           </v-template>
         </ListView>
-    </StackLayout>
+      </TabViewItem>
+    </TabView>
   </Page>
 </template>
+
 
 <script>
 
 import * as ApplicationSettings from '@nativescript/core/application-settings';
 
-
 export default {
-  data () {
+  data() {
     return {
-      newText: '',
-      tasks: []
-    }
+        dones: [],
+        todos: [],
+        textFieldValue: '',
+    };
   },
-  mounted(){
-    if(ApplicationSettings.getString('tasks')){
-      this.tasks=Object.values(JSON.parse(ApplicationSettings.getString('tasks')));
+    mounted(){
+    if(ApplicationSettings.getString('todos')){
+        this.todos=Object.values(JSON.parse(ApplicationSettings.getString('todos')));
     }
   },
   methods: {
-    newTask () {
-      if(this.newText != ''){
-        this.tasks.push({
-          id: Math.random(),
-          title: this.newText,
-          done: false
-        });
-        this.newText = '';
-      }
-      this.save();
-    },
-    taskDone (id) {
-      this.tasks = this.tasks.map(task => {
-        if (task.id == id) task.done = !task.done;
-        return task;
-      })
-      
-      this.save();
-    },
-    remove (id) {
-      this.tasks = this.tasks.filter(task => task.id !== id);
-      this.save();
+    onItemTap(args) {
+      console.log(`Item with index: ${args.index} tapped`);
+      action('Что делаем?', 'Отмена', [
+        'Сделано!',
+        'Удалить',
+      ]).then(result => {
+        console.log(result); 
+        switch (result) {
+          case 'Сделано!':
+            this.dones.unshift(args.item); 
+            this.todos.splice(args.index, 1); 
+            this.save();
+            break;
+          case 'Удалить':
+            this.todos.splice(args.index, 1); 
+            this.save();
+            break;
+          case 'Отмена' || undefined: 
+            break;
+        }
+      });
     },
     save(){
-      let toSave = Object.assign({}, this.tasks);
-      ApplicationSettings.setString('tasks', JSON.stringify(toSave));
+        let toSave = Object.assign({}, this.todos);
+        ApplicationSettings.setString('todos', JSON.stringify(toSave));
     },
-    
-    edit(id, old_text) {
-      prompt({
-        title: "Изменить",
-        message: "Введите изменения:",
-        okButtonText: "OK",
-        defaultText: old_text,
-      })
-      .then(result => {
-         this.tasks.forEach(task => {
-          if (task.id == id && result.text != ''){
-            task.title = result.text;
+    onDoneTap: function(args) {
+      action('Удаляем? :D', 'Отмена', [        
+        'Нет',
+      ]).then(result => {
+        console.log(result); 
+        switch (result) {
+          case 'Удалить':
+            this.dones.splice(args.index, 1);
             this.save();
-          }    
-         });
-      })
-    }
-  }
-}
+            break;
+
+          case 'Нет' || undefined: 
+          break;
+        }
+      });
+    },
+    onButtonTap() {
+      
+      if (!this.textFieldValue) {
+        return;
+      }
+      console.log(`New task added: ${this.textFieldValue}.`);     
+      this.todos.unshift({
+        name: this.textFieldValue,
+      });     
+      this.textFieldValue = '';
+      this.save();
+    },
+  },
+};
 </script>
 
-<style>
-.app{
-    background-color: white;
-}
-.Add:active{
-  color: yellowgreen;
-  background-color:greenyellow;
-  text-shadow: black 2px 3px 4px;
-}
+<style scoped>
 TextField {
-  font-size: 18;
-  color: black;
+  font-size: 20;
+  color: #53ba82;
   margin-top: 10;
   margin-bottom: 10;
   margin-right: 5;
@@ -120,7 +167,7 @@ TextField {
   height: 60;
 }
 button {
-  font-size: 18;
+  font-size: 12;
   font-weight: bold;
   color: white;
   background-color: #53ba82;
@@ -131,25 +178,20 @@ button {
   margin-left: 10;
   border-radius: 20px;
 }
-.task{
-  font-size: 18;
-  margin: 30px 20px;
-  color: black;
-  text-align: center;
+#active-task {
+  font-size: 20;
+  font-weight: bold;
+  color: #53ba82;
+  margin-left: 20;
+  padding-top: 5;
+  padding-bottom: 10;
 }
-.done {
+#completed-task {
+  font-size: 20;
+  color: #d3d3d3;
+  margin-left: 20;
+  padding-top: 5;
+  padding-bottom: 10;
   text-decoration: line-through;
-  color: #5f5f5f;
-}
-.button{
-  background-color: #53ba82;
-  border-radius: 10%;
-  color: #ffffff;
-  margin: 30px 10px;
-}
-.button:active {
-  color: yellowgreen;
-  background-color:greenyellow;
-  text-shadow: black 2px 3px 4px;
 }
 </style>
