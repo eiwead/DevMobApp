@@ -1,6 +1,6 @@
 <template>
   <Page class="page">
-    <ActionBar title="My Tasks" class="action-bar" />
+    <ActionBar title="Мои задачи" class="action-bar" />
 
     <TabView
       height="100%"
@@ -8,7 +8,7 @@
       selected-tab-text-color="#53ba82"
       tab-text-font-size="15"
     >
-      <TabViewItem title="To Do" text-transform="uppercase">
+      <TabViewItem title="Сделать" text-transform="uppercase">
         
         <StackLayout
           orientation="vertical"
@@ -25,7 +25,7 @@
               v-model="textFieldValue"
               col="0"
               row="0"
-              hint="Type new task..."
+              hint="Введите задачу..."
               editable="true"
               @returnPress="onButtonTap"
             />
@@ -33,7 +33,7 @@
             <Button
               col="1"
               row="0"
-              text="Add task"
+              text="Добавить"
               @tap="onButtonTap"
             />
           </GridLayout>
@@ -57,7 +57,7 @@
         </StackLayout>
       </TabViewItem>
 
-      <TabViewItem title="Completed" text-transform="uppercase">
+      <TabViewItem title="Выполненные" text-transform="uppercase">
         <ListView
           class="list-group"
           for="done in dones"
